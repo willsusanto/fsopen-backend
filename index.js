@@ -10,6 +10,11 @@ app.get("/api/persons", (request, response) => {
     return response.json(phonebooks);
 })
 
+app.get("/info", (request, response) => {
+    const peopleCount = phonebooks.length;
+    return response.send(`Phonebook has info for ${peopleCount} people<br>${Date()}`);
+})
+
 app.listen(port, () => {
     console.log("Connected!");
 })
