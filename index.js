@@ -15,17 +15,34 @@ const isNullOrWhitespace = (input) => {
     return input === null || input === undefined || input === "" || input.trim() === "";
 }
 
+const isNameExist = (nameToCheck) => {
+    const lowerCaseNameToCheck = nameToCheck.toLowerCase().trim();
+    const findName = phonebooks.some(person => person.toLowerCase().trim() === lowerCaseNameToCheck);
+
+    return findName;
+}
+
 app.get("/api/persons", (request, response) => {
     return response.json(phonebooks);
 })
 
 app.post("/api/persons", (request, response) => {
     if (isNullOrWhitespace(request.name)) {
-        return response.status(400).end();
+        return response.status(400).json({
+            error: "Name must be filled!" 
+        });
     }
 
     if (isNullOrWhitespace(request.number)) {
-        return response.status(400).end();
+        return response.status(400).json({
+            error: "Number must be filled!" 
+        })
+    }
+
+    if (isNameExist(request.name)) {
+        return response.status(400).json({
+            error: "Name already exists!"
+        });
     }
 
     const newData = {
