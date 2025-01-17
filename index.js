@@ -17,7 +17,7 @@ const isNullOrWhitespace = (input) => {
 
 const isNameExist = (nameToCheck) => {
     const lowerCaseNameToCheck = nameToCheck.toLowerCase().trim();
-    const findName = phonebooks.some(person => person.toLowerCase().trim() === lowerCaseNameToCheck);
+    const findName = phonebooks.some(person => person.name.toLowerCase().trim() === lowerCaseNameToCheck);
 
     return findName;
 }
@@ -27,19 +27,21 @@ app.get("/api/persons", (request, response) => {
 })
 
 app.post("/api/persons", (request, response) => {
-    if (isNullOrWhitespace(request.name)) {
+    const data = request.body;
+    console.log(data);
+    if (isNullOrWhitespace(data.name)) {
         return response.status(400).json({
             error: "Name must be filled!" 
         });
     }
 
-    if (isNullOrWhitespace(request.number)) {
+    if (isNullOrWhitespace(data.number)) {
         return response.status(400).json({
             error: "Number must be filled!" 
         })
     }
 
-    if (isNameExist(request.name)) {
+    if (isNameExist(data.name)) {
         return response.status(400).json({
             error: "Name already exists!"
         });
@@ -47,8 +49,8 @@ app.post("/api/persons", (request, response) => {
 
     const newData = {
         id: generateNewId(),
-        name: request.name,
-        number: request.number
+        name: data.name,
+        number: data.number
     };
     phonebooks = [...phonebooks, newData]
     
