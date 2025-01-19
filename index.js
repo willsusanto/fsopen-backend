@@ -4,7 +4,9 @@ const app = express();
 const port = 3001;
 
 app.use(express.json());
-app.use(morgan('tiny'));
+
+morgan.token("body", (request, _) => JSON.stringify(request.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
 let phonebooks = require("./data/phonebook.json");
 
