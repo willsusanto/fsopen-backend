@@ -1,8 +1,10 @@
 const express = require ('express');
+const morgan = require('morgan');
 const app = express();
 const port = 3001;
 
-app.use(express.json())
+app.use(express.json());
+app.use(morgan('tiny'));
 
 let phonebooks = require("./data/phonebook.json");
 
@@ -28,7 +30,7 @@ app.get("/api/persons", (request, response) => {
 
 app.post("/api/persons", (request, response) => {
     const data = request.body;
-    console.log(data);
+    
     if (isNullOrWhitespace(data.name)) {
         return response.status(400).json({
             error: "Name must be filled!" 
