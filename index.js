@@ -91,6 +91,12 @@ app.get("/info", (request, response) => {
     return response.send(`Phonebook has info for ${peopleCount} people<br>${Date()}`);
 })
 
+const unknownEndpoint = (_, response, next) => {
+    response.status(404).send({ error: "Unknown endpoint. "});
+    next();
+}
+
+app.use(unknownEndpoint);
 
 app.listen(port, () => {
     console.log(`Connected on PORT: ${port}!`);
