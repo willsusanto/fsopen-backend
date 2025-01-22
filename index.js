@@ -1,8 +1,15 @@
 const express = require ('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const app = express();
 const port = 3001;
 
+const corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 morgan.token("body", (request, _) => JSON.stringify(request.body))
@@ -12,7 +19,7 @@ let phonebooks = require("./data/phonebook.json");
 
 const generateNewId = () => {
     const maxValue = 100000000;
-    return Math.floor(Math.random() * maxValue);
+    return String(Math.floor(Math.random() * maxValue));
 }
 
 const isNullOrWhitespace = (input) => {
@@ -86,6 +93,6 @@ app.get("/info", (request, response) => {
 
 
 app.listen(port, () => {
-    console.log("Connected!");
+    console.log(`Connected on PORT: ${port}!`);
 })
 
