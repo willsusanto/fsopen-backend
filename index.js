@@ -1,6 +1,9 @@
+require('dotenv').config();
+
 const express = require ('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const { Person, isValidObjectId } = require('./models/person');
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -16,27 +19,40 @@ app.use(express.static("dist"));
 morgan.token("body", (request, _) => JSON.stringify(request.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
-let phonebooks = require("./data/phonebook.json");
-
-const generateNewId = () => {
-    const maxValue = 100000000;
-    return String(Math.floor(Math.random() * maxValue));
-}
-
 const isNullOrWhitespace = (input) => {
     return input === null || input === undefined || input === "" || input.trim() === "";
 }
 
-const isNameExist = (nameToCheck) => {
-    const lowerCaseNameToCheck = nameToCheck.toLowerCase().trim();
-    const findName = phonebooks.some(person => person.name.toLowerCase().trim() === lowerCaseNameToCheck);
-
-    return findName;
-}
-
-app.get("/api/persons", (request, response) => {
-    return response.json(phonebooks);
+app.get("/api/persons", (_, response) => {
+    Person.find({}).exec().then(result => {
+        return response.json(result);
+    })
 })
+
+app.get("/api/persons/:id", (request, response) => {
+    const id = request.params.id;
+
+    if (!isValidObjectId(id)) {
+        return response.status(400).json({
+            "messsage": "Invalid id format."
+        });
+    }
+
+    const person = Person.findById(id).exec()
+        .then(result => {
+            if (result === null) {
+                return response.status(404).json({
+                    "messsage": "Resource not found."
+                });
+            }
+
+            response.json(result);
+        })
+        .catch(error => {
+            console.log(error);
+            return response.status(500);
+        })
+});
 
 app.post("/api/persons", (request, response) => {
     const data = request.body;
@@ -53,38 +69,50 @@ app.post("/api/persons", (request, response) => {
         })
     }
 
-    if (isNameExist(data.name)) {
-        return response.status(400).json({
-            error: "Name already exists!"
-        });
-    }
+    // if (isNameExist(data.name)) {
+    //     return response.status(400).json({
+    //         error: "Name already exists!"
+    //     });
+    // }
 
-    const newData = {
-        id: generateNewId(),
+    const newData = new Person({
         name: data.name,
         number: data.number
-    };
-    phonebooks = [...phonebooks, newData]
-    
-    return response.status(201).json(newData);
+    });
+
+    newData.save()
+        .then(result => {
+            return response.status(201).json(result);
+        })
+        .catch(error => {
+            console.error("ERROR: Failed to save! ", error);
+            return response.status(500);
+        })
 })
-
-app.get("/api/persons/:id", (request, response) => {
-    const id = request.params.id;
-    const person = phonebooks.find(pers => pers.id === id);
-
-    if (person === undefined) {
-        return response.status(404).end();
-    }
-
-    return response.json(person);
-});
 
 app.delete("/api/persons/:id", (request, response) => {
     const id = request.params.id;
-    phonebooks = phonebooks.filter(person => person.id !== id);
 
-    return response.status(204).end();
+    if (!isValidObjectId(id)) {
+        return response.status(400).json({
+            "messsage": "Invalid id format."
+        });
+    }
+
+    const person = Person.findByIdAndDelete(id).exec()
+        .then(result => {
+            if (result === null) {
+                return response.status(404).json({
+                    "messsage": "Resource not found."
+                });
+            }
+
+            response.status(204).end();
+        })
+        .catch(error => {
+            console.log(error);
+            return response.status(500);
+        })
 })
 
 app.get("/info", (request, response) => {
