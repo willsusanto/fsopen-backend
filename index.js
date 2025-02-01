@@ -29,14 +29,8 @@ app.get("/api/persons", (_, response) => {
     })
 })
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
     const id = request.params.id;
-
-    if (!isValidObjectId(id)) {
-        return response.status(400).json({
-            "messsage": "Invalid id format."
-        });
-    }
 
     const person = Person.findById(id).exec()
         .then(result => {
@@ -48,13 +42,10 @@ app.get("/api/persons/:id", (request, response) => {
 
             response.json(result);
         })
-        .catch(error => {
-            console.log(error);
-            return response.status(500);
-        })
+        .catch(error => next(error));
 });
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
     const data = request.body;
     
     if (isNullOrWhitespace(data.name)) {
@@ -84,20 +75,11 @@ app.post("/api/persons", (request, response) => {
         .then(result => {
             return response.status(201).json(result);
         })
-        .catch(error => {
-            console.error("ERROR: Failed to save! ", error);
-            return response.status(500);
-        })
+        .catch(error => next(error));
 })
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/persons/:id", (request, response, next) => {
     const id = request.params.id;
-
-    if (!isValidObjectId(id)) {
-        return response.status(400).json({
-            "messsage": "Invalid id format."
-        });
-    }
 
     const person = Person.findByIdAndDelete(id).exec()
         .then(result => {
@@ -109,10 +91,7 @@ app.delete("/api/persons/:id", (request, response) => {
 
             response.status(204).end();
         })
-        .catch(error => {
-            console.log(error);
-            return response.status(500);
-        })
+        .catch(error => next(error));
 })
 
 app.get("/info", (request, response) => {
@@ -126,6 +105,19 @@ const unknownEndpoint = (_, response, next) => {
 }
 
 app.use(unknownEndpoint);
+
+const errorHandler = (error, request, response, next) => {
+    console.error("ERROR: ", error.message);
+
+    if (error.name === "CastError") {
+        return response.status(400).json({
+            message: "Invalid format."
+        });
+    }
+
+    next(error);
+}
+app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Connected on PORT: ${port}!`);
