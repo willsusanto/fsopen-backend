@@ -76,6 +76,22 @@ app.post("/api/persons", (request, response, next) => {
             return response.status(201).json(result);
         })
         .catch(error => next(error));
+});
+
+app.put("/api/persons/:id", (request, response, next) => {
+    const id = request.params.id;
+    const body = request.body;
+
+    const updatedPerson = {
+        name: body.name,
+        number: body.number
+    };
+
+    Person.findByIdAndUpdate(id, updatedPerson, { new: true }).exec()
+        .then(result => {
+            response.json(result);
+        })
+        .catch(error => next(error));
 })
 
 app.delete("/api/persons/:id", (request, response, next) => {
