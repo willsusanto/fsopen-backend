@@ -7,7 +7,8 @@
     "start": "npm run build:ui && node index.js",
     "dev": "npm run build:ui && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "node index.js"
+    "deploy": "node index.js",
+    "dev-local": "nodemon index.js"
   },
   "author": "William",
   "license": "ISC",

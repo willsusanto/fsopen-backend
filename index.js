@@ -87,7 +87,7 @@ app.put("/api/persons/:id", (request, response, next) => {
         number: body.number
     };
 
-    Person.findByIdAndUpdate(id, updatedPerson, { new: true }).exec()
+    Person.findByIdAndUpdate(id, updatedPerson, { new: true, runValidators: true }).exec()
         .then(result => {
             response.json(result);
         })
@@ -132,6 +132,10 @@ const errorHandler = (error, request, response, next) => {
         return response.status(400).json({
             message: "Invalid format."
         });
+    } else if (error.name === 'ValidationError') { 
+        return response.status(400).json({ 
+            message: error.message 
+        })
     }
 
     next(error);
