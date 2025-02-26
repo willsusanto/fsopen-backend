@@ -8,7 +8,8 @@
     "dev": "npm run build:ui && nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "node index.js",
-    "dev-local": "nodemon index.js"
+    "dev-local": "nodemon index.js",
+    "lint": "eslint ."
   },
   "author": "William",
   "license": "ISC",
@@ -21,6 +22,10 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@stylistic/eslint-plugin-js": "^4.0.1",
+    "eslint": "^9.21.0",
+    "globals": "^16.0.0",
     "nodemon": "^3.1.9"
   }
 }
